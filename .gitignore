@@ -18,5 +18,6 @@ _deps
 
 out/
 runtime/
+build/
 
 vcpkg/
