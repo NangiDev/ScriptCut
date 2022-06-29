@@ -12,6 +12,9 @@ _deps
 
 .vs/
 .vscode/
+*.vcxproj
+*.sln
+*.vcxproj.filters
 
 out/
 runtime/
