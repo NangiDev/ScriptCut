@@ -1,5 +1,6 @@
 ﻿#include "ScriptCut.h"
 #include <Windows.h>
+#include <cstdlib>
 
 bool ScriptCut::OpenFileDialog(std::string* path) {
 	OPENFILENAME ofn;
@@ -19,11 +20,10 @@ bool ScriptCut::OpenFileDialog(std::string* path) {
 		*path = fileNameStr;
 		return true;
 	}
-
 	return false;
 }
 
-int ScriptCut::Render(State *state)
+int ScriptCut::Render(State* state)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -50,7 +50,7 @@ int ScriptCut::Render(State *state)
 					std::string name = state->ScriptPath;
 					ImGui::LabelText("##Command_label", "My description");
 					ImGui::Indent();
-					ImGui::InputText("##Input_label", const_cast<char *>(name.c_str()), 64);
+					ImGui::InputText("##Input_label", const_cast<char*>(name.c_str()), 64);
 					ImGui::SameLine();
 					if (ImGui::Button("..."))
 					{
@@ -59,7 +59,24 @@ int ScriptCut::Render(State *state)
 						else
 							OpenFileDialog(&state->ScriptPath);
 					}
-					if (state->WindowWidth > 350)
+					ImGui::SameLine();
+					static const std::string RTEnv[] =
+					{
+						"CMD",
+						"PowerShell",
+						"Bash"
+					};
+					ImGui::SetNextItemWidth(100.0f);
+					if (ImGui::BeginCombo("##RuntimeEnvironments", state->RTEnvPreview.c_str()))
+					{
+						for (int n = 0; n < IM_ARRAYSIZE(RTEnv); n++) {
+							if (ImGui::Selectable(RTEnv[n].c_str(), true)) {
+								state->RTEnvPreview = RTEnv[n];
+							}
+						}
+						ImGui::EndCombo();
+					}
+					if (state->WindowWidth > 450)
 					{
 						ImGui::SameLine(state->WindowWidth - 60);
 					}
@@ -69,6 +86,10 @@ int ScriptCut::Render(State *state)
 					}
 					if (ImGui::Button("Run"))
 					{
+						if (state->ScriptPath.length() > 0)
+						{
+							std::cout << "Calling: " << state->ScriptPath << "\n";
+						}
 					}
 					std::string title = "Arguments";
 					std::string index = std::to_string(i);
@@ -124,14 +145,14 @@ int ScriptCut::Render(State *state)
 	return 0;
 }
 
-int ScriptCut::Update(State *state)
+int ScriptCut::Update(State* state)
 {
 	glfwPollEvents();
 	glfwGetWindowSize(ScriptCut::GetWindow(), &state->WindowWidth, &state->WindowHeight);
 	return 0;
 }
 
-int main(int, char **)
+int main(int, char**)
 {
 	// Init GLFW window
 	if (!ScriptCut::Init())
