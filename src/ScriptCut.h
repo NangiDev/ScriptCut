@@ -15,7 +15,7 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
-enum MenuCollapseState
+enum class MenuCollapseState
 {
     NoneOpen,
     CommandOpen,
@@ -27,6 +27,7 @@ struct State
 {
     int WindowWidth;
     int WindowHeight;
+    std::string ScriptPath = "";
     ImVec4 ClearColor;
     MenuCollapseState MenuOpenState;
     ImVec2 GetWindowSize();
@@ -41,6 +42,7 @@ ImVec2 State::GetWindowSize()
 class ScriptCut
 {
 private:
+    static bool OpenFileDialog(std::string *);
 public:
     ScriptCut();
     ~ScriptCut();

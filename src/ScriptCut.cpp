@@ -1,4 +1,27 @@
 ﻿#include "ScriptCut.h"
+#include <Windows.h>
+
+bool ScriptCut::OpenFileDialog(std::string* path) {
+	OPENFILENAME ofn;
+	char fileName[MAX_PATH] = "";
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = fileName;
+	ofn.nMaxFile = MAX_PATH;
+	ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+	ofn.lpstrDefExt = "";
+
+	std::string fileNameStr;
+
+	if (GetOpenFileName(&ofn)) {
+		fileNameStr = fileName;
+		*path = fileNameStr;
+		return true;
+	}
+
+	return false;
+}
 
 int ScriptCut::Render(State *state)
 {
@@ -20,17 +43,21 @@ int ScriptCut::Render(State *state)
 			numOpenMenus++;
 			ImGui::BeginChild("InsideCommands", ImVec2(0, state->WindowHeight - titleBarHeight), true, ImGuiWindowFlags_AlwaysAutoResize);
 
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				{
 					ImGui::BeginGroup();
-					static char name[64] = "C:/my/cool/script.bat";
+					std::string name = state->ScriptPath;
 					ImGui::LabelText("##Command_label", "My description");
 					ImGui::Indent();
-					ImGui::InputText("##Input_label", name, 64);
+					ImGui::InputText("##Input_label", const_cast<char *>(name.c_str()), 64);
 					ImGui::SameLine();
 					if (ImGui::Button("..."))
 					{
+						if (WIN32 || _WIN64)
+							OpenFileDialog(&state->ScriptPath);
+						else
+							OpenFileDialog(&state->ScriptPath);
 					}
 					if (state->WindowWidth > 350)
 					{
@@ -111,10 +138,9 @@ int main(int, char **)
 		return 1;
 
 	// Implement State/Update/Render (SUR)
-	int openState = MenuCollapseState::CommandOpen;
-
 	State state{};
 	state.ClearColor = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	state.MenuOpenState = MenuCollapseState::CommandOpen;
 
 	while (ScriptCut::IsRunning())
 	{
